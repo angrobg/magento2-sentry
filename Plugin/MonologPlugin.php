@@ -6,7 +6,6 @@ use JustBetter\Sentry\Helper\Data;
 use JustBetter\Sentry\Model\SentryLog;
 use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\Logger\Monolog;
-use Monolog\DateTimeImmutable;
 
 class MonologPlugin extends Monolog
 {
@@ -35,7 +34,8 @@ class MonologPlugin extends Monolog
         DeploymentConfig $deploymentConfig,
         array $handlers = [],
         array $processors = []
-    ) {
+    )
+    {
         $this->sentryHelper = $data;
         $this->sentryLog = $sentryLog;
         $this->deploymentConfig = $deploymentConfig;
@@ -46,22 +46,22 @@ class MonologPlugin extends Monolog
     /**
      * Adds a log record to Sentry.
      *
-     * @param int    $level   The logging level
+     * @param int $level The logging level
      * @param string $message The log message
-     * @param array  $context The log context
+     * @param array $context The log context
      *
      * @return bool Whether the record has been processed
      */
     public function addRecord(
-        int $level,
-        string $message,
-        array $context = [],
-        DateTimeImmutable $datetime = null
-    ): bool {
+        $level,
+        $message,
+        $context = []
+    ): bool
+    {
         if ($this->deploymentConfig->isAvailable() && $this->sentryHelper->isActive()) {
             $this->sentryLog->send($message, $level, $context);
         }
 
-        return parent::addRecord($level, $message, $context, $datetime);
+        return parent::addRecord($level, $message, $context);
     }
 }
