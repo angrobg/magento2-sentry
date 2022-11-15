@@ -64,6 +64,16 @@ class SentryScript extends Template
     }
 
     /**
+     * Get the version of the JS-SDK of Sentry.
+     *
+     * @return string
+     */
+    public function getJsSdkVersion()
+    {
+        return $this->dataHelper->getJsSdkVersion();
+    }
+
+    /**
      * Get the current version of the Magento application.
      *
      * @return int|string
@@ -136,5 +146,15 @@ class SentryScript extends Template
     public function getStoreCode()
     {
         return $this->_storeManager->getStore()->getCode();
+    }
+
+    public function isTracingEnabled(): bool
+    {
+        return $this->dataHelper->isTracingEnabled();
+    }
+
+    public function getTracingSampleRate(): float
+    {
+        return $this->dataHelper->getTracingSampleRate();
     }
 }
