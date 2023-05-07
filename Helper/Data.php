@@ -4,6 +4,7 @@ namespace JustBetter\Sentry\Helper;
 
 use JustBetter\Sentry\Block\SentryScript;
 use Magento\Framework\App\Area;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
@@ -23,6 +24,31 @@ class Data extends AbstractHelper
     protected $storeManager;
 
     /**
+     * @var State
+     */
+    protected $appState;
+
+    /**
+     * @var ScopeConfigInterface
+     */
+    protected $scopeConfig;
+
+    /**
+     * @var ProductMetaDataInterface
+     */
+    protected $productMetadataInterface;
+
+    /**
+     * @var DeploymentConfig
+     */
+    protected $deploymentConfig;
+
+    /**
+     * @var array
+     */
+    protected $config = [];
+
+    /**
      * @var array
      */
     protected $configKeys = [
@@ -37,16 +63,6 @@ class Data extends AbstractHelper
         'tracing_enabled',
         'tracing_sample_rate',
     ];
-
-    /**
-     * @var array
-     */
-    protected $config = [];
-
-    /**
-     * @var State
-     */
-    protected $appState;
 
     /**
      * Data constructor.
@@ -239,6 +255,31 @@ class Data extends AbstractHelper
     public function useScriptTag()
     {
         return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS.'enable_script_tag');
+    }
+
+    public function useSessionReplay(): bool
+    {
+        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS.'enable_session_replay');
+    }
+
+    public function getReplaySessionSampleRate(): float
+    {
+        return $this->getConfigValue(static::XML_PATH_SRS.'replay_session_sample_rate') ?? 0.1;
+    }
+
+    public function getReplayErrorSampleRate(): float
+    {
+        return $this->getConfigValue(static::XML_PATH_SRS.'replay_error_sample_rate') ?? 1;
+    }
+
+    public function getReplayBlockMedia(): bool
+    {
+        return $this->getConfigValue(static::XML_PATH_SRS.'replay_block_media') ?? true;
+    }
+
+    public function getReplayMaskText(): bool
+    {
+        return $this->getConfigValue(static::XML_PATH_SRS.'replay_mask_text') ?? true;
     }
 
     /**
