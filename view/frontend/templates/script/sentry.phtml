@@ -23,16 +23,24 @@ $remoteFile = sprintf(
     $block->escapeHtmlAttr($block->getJsSdkVersion()),
     $bundleFile
 );
+
+// NIMA CHANGES
+$remoteFileCaptureConsole = sprintf(
+    'https://browser.sentry-cdn.com/%s/captureconsole.min.js',
+    $block->escapeHtmlAttr($block->getJsSdkVersion())
+);
 ?>
 
 <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise" crossorigin></script>
 <script src="<?= /** @noEscape */$remoteFile ?>" crossorigin="anonymous"></script>
+<script src="<?= /** @noEscape */$remoteFileCaptureConsole ?>" crossorigin="anonymous"></script>
 <script>
     Sentry.init({
         dsn: '<?= $block->escapeUrl(trim($block->getDSN())) ?>',
         release: '<?= $block->escapeHtml(trim($block->getVersion())) ?>',
         environment: '<?= $block->escapeHtml(trim($block->getEnvironment())) ?>',
         integrations: [
+            new Sentry.Integrations.CaptureConsole({ levels: ['error'] }),
             <?php if ($block->isTracingEnabled()): ?>
                 new Sentry.BrowserTracing(),
             <?php endif ?>
