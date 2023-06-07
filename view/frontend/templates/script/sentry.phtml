@@ -29,20 +29,45 @@ $remoteFileCaptureConsole = sprintf(
     'https://browser.sentry-cdn.com/%s/captureconsole.min.js',
     $block->escapeHtmlAttr($block->getJsSdkVersion())
 );
+
+$replaySessionRate = $block->getReplaySessionSampleRate();
+$replayErrorRate = $block->getReplayErrorSampleRate();
+
+// NIMA CHANGES - allow to fully log certain important uris
+$logAllUris = [
+    '/checkout',
+];
+
+$requestUri = $_SERVER['REQUEST_URI'] ?? null;
+$logAllReplays = false;
+
+if ($requestUri) {
+    foreach ($logAllUris as $uri) {
+        if (substr($requestUri, 0, strlen($uri)) == $uri) {
+            $logAllReplays = true;
+            $replaySessionRate = $replayErrorRate = '1';
+            break;
+        }
+        unset($uri);
+    }
+}
+
 ?>
 
 <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise" crossorigin></script>
-<script src="<?= /** @noEscape */$remoteFile ?>" crossorigin="anonymous"></script>
-<script src="<?= /** @noEscape */$remoteFileCaptureConsole ?>" crossorigin="anonymous"></script>
+<script src="<?= /** @noEscape */
+$remoteFile ?>" crossorigin="anonymous"></script>
+<script src="<?= /** @noEscape */
+$remoteFileCaptureConsole ?>" crossorigin="anonymous"></script>
 <script>
     Sentry.init({
         dsn: '<?= $block->escapeUrl(trim($block->getDSN())) ?>',
         release: '<?= $block->escapeHtml(trim($block->getVersion())) ?>',
         environment: '<?= $block->escapeHtml(trim($block->getEnvironment())) ?>',
         integrations: [
-            new Sentry.Integrations.CaptureConsole({ levels: ['error'] }),
+            new Sentry.Integrations.CaptureConsole({levels: ['error']}),
             <?php if ($block->isTracingEnabled()): ?>
-                new Sentry.BrowserTracing(),
+            new Sentry.BrowserTracing(),
             <?php endif ?>
             <?php if ($block->useSessionReplay()): ?>
             new Sentry.Replay({
@@ -54,14 +79,14 @@ $remoteFileCaptureConsole = sprintf(
         <?php if ($block->isTracingEnabled()): ?>
         tracesSampleRate: <?= $block->escapeHtml($block->getTracingSampleRate()) ?>,
         <?php endif ?>
-        <?php if ($block->useSessionReplay()): ?>
-        replaysSessionSampleRate: <?= $block->escapeHtml($block->getReplaySessionSampleRate()) ?>,
-        replaysOnErrorSampleRate: <?= $block->escapeHtml($block->getReplayErrorSampleRate()) ?>,
+        <?php if ($logAllReplays || $block->useSessionReplay()): ?>
+        replaysSessionSampleRate: <?= $block->escapeHtml($replaySessionRate) ?>,
+        replaysOnErrorSampleRate: <?= $block->escapeHtml($replayErrorRate) ?>,
         <?php endif ?>
         <?php if ($block->stripStaticContentVersion() || $block->stripStoreCode()): ?>
-        beforeSend: function(event) {
+        beforeSend: function (event) {
             event.exception.values.map(function (value) {
-                if (value.stacktrace === undefined || ! value.stacktrace) {
+                if (value.stacktrace === undefined || !value.stacktrace) {
                     return value;
                 }
 
@@ -85,8 +110,48 @@ $remoteFileCaptureConsole = sprintf(
             });
             return event;
         }
-    <?php endif; ?>
+        <?php endif; ?>
     });
+
+
+    define('customerData',
+        ['jquery', 'Magento_Customer/js/customer-data'],
+        function ($, customerData) {
+            'use strict';
+
+            var getCustomerInfo = function () {
+                var customer = customerData.get('customer');
+
+                return customer();
+            };
+
+            var isLoggedIn = function (customerInfo) {
+                return customerInfo && customerInfo.firstname;
+            };
+
+            return function () {
+                var deferred = $.Deferred();
+                var customerInfo = getCustomerInfo();
+
+                if (customerInfo && customerInfo.data_id) {
+                    deferred.resolve(isLoggedIn(customerInfo), customerInfo);
+                } else {
+                    customerData.reload(['customer'], false)
+                        .done(function () {
+                            customerInfo = getCustomerInfo()
+                            deferred.resolve(isLoggedIn(customerInfo), customerInfo);
+                        })
+                        .fail(function () {
+                            deferred.reject();
+                        });
+                }
+
+                return deferred;
+            };
+
+        }
+    );
+
 </script>
 
 <?php if ($block->useLogRocket()): ?>
@@ -102,44 +167,6 @@ $remoteFileCaptureConsole = sprintf(
         });
 
         <?php if ($block->useLogRocketIdentify()): ?>
-
-        define('customerData',
-            ['jquery', 'Magento_Customer/js/customer-data'],
-            function ($, customerData) {
-                'use strict';
-
-                var getCustomerInfo = function () {
-                    var customer = customerData.get('customer');
-
-                    return customer();
-                };
-
-                var isLoggedIn = function (customerInfo) {
-                    return customerInfo && customerInfo.firstname;
-                };
-
-                return function () {
-                    var deferred = $.Deferred();
-                    var customerInfo = getCustomerInfo();
-
-                    if (customerInfo && customerInfo.data_id) {
-                        deferred.resolve(isLoggedIn(customerInfo), customerInfo);
-                    } else {
-                        customerData.reload(['customer'], false)
-                            .done(function () {
-                                customerInfo = getCustomerInfo()
-                                deferred.resolve(isLoggedIn(customerInfo), customerInfo);
-                            })
-                            .fail(function () {
-                                deferred.reject();
-                            });
-                    }
-
-                    return deferred;
-                };
-
-            }
-        );
 
         require(["customerData"], function (customerData) {
 
@@ -160,3 +187,20 @@ $remoteFileCaptureConsole = sprintf(
         <?php endif; ?>
     </script>
 <?php endif; ?>
+<script>
+    require(["customerData"], function (customerData) {
+
+        customerData().then(function (loggedIn, data) {
+            if (!loggedIn) {
+                return;
+            }
+
+            var ud = {email: data.email, id: data.id, name: data.fullname};
+
+            console.log('uddddd', ud)
+
+            Sentry.setUser(ud);
+
+        });
+    });
+</script>
