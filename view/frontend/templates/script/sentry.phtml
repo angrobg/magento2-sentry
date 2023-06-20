@@ -113,10 +113,9 @@ $remoteFileCaptureConsole ?>" crossorigin="anonymous"></script>
         <?php endif; ?>
     });
 
-
     define('customerData',
-        ['jquery', 'Magento_Customer/js/customer-data'],
-        function ($, customerData) {
+        ['domReady!', 'jquery', 'Magento_Customer/js/customer-data'],
+        function (domReady, $, customerData) {
             'use strict';
 
             var getCustomerInfo = function () {
@@ -139,7 +138,10 @@ $remoteFileCaptureConsole ?>" crossorigin="anonymous"></script>
                     customerData.reload(['customer'], false)
                         .done(function () {
                             customerInfo = getCustomerInfo()
-                            deferred.resolve(isLoggedIn(customerInfo), customerInfo);
+                            // NIMA CHANGES: just in case!
+                            setTimeout(function() {
+                                deferred.resolve(isLoggedIn(customerInfo), customerInfo);
+                            }, 300);
                         })
                         .fail(function () {
                             deferred.reject();
@@ -196,9 +198,6 @@ $remoteFileCaptureConsole ?>" crossorigin="anonymous"></script>
             }
 
             var ud = {email: data.email, id: data.id, name: data.fullname};
-
-            console.log('uddddd', ud)
-
             Sentry.setUser(ud);
 
         });
