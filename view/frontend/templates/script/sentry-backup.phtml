@@ -53,6 +53,7 @@ if ($requestUri) {
 }
 
 ?>
+
 <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise" crossorigin></script>
 <script src="<?= /** @noEscape */
 $remoteFile ?>" crossorigin="anonymous"></script>
@@ -110,5 +111,95 @@ $remoteFileCaptureConsole ?>" crossorigin="anonymous"></script>
             return event;
         }
         <?php endif; ?>
+    });
+
+    define('customerData',
+        ['domReady!', 'jquery', 'Magento_Customer/js/customer-data'],
+        function (domReady, $, customerData) {
+            'use strict';
+
+            var getCustomerInfo = function () {
+                var customer = customerData.get('customer');
+
+                return customer();
+            };
+
+            var isLoggedIn = function (customerInfo) {
+                return customerInfo && customerInfo.firstname;
+            };
+
+            return function () {
+                var deferred = $.Deferred();
+                var customerInfo = getCustomerInfo();
+
+                if (customerInfo && customerInfo.data_id) {
+                    deferred.resolve(isLoggedIn(customerInfo), customerInfo);
+                } else {
+                    customerData.reload(['customer'], false)
+                        .done(function () {
+                            customerInfo = getCustomerInfo()
+                            // NIMA CHANGES: just in case!
+                            setTimeout(function() {
+                                deferred.resolve(isLoggedIn(customerInfo), customerInfo);
+                            }, 300);
+                        })
+                        .fail(function () {
+                            deferred.reject();
+                        });
+                }
+
+                return deferred;
+            };
+
+        }
+    );
+
+</script>
+
+<?php if ($block->useLogRocket()): ?>
+    <script src="https://cdn.lr-ingest.io/LogRocket.min.js" crossorigin="anonymous"></script>
+    <script>
+        window.LogRocket && window.LogRocket.init('<?= /* @noEscape */ trim($block->getLogrocketKey()) ?>');
+    </script>
+    <script>
+        LogRocket.getSessionURL(sessionURL => {
+            Sentry.configureScope(scope => {
+                scope.setExtra("sessionURL", sessionURL);
+            });
+        });
+
+        <?php if ($block->useLogRocketIdentify()): ?>
+
+        require(["customerData"], function (customerData) {
+
+            customerData().then(function (loggedIn, data) {
+                if (!loggedIn) {
+                    return;
+                }
+
+                LogRocket.identify(data.websiteId, {
+                    name: data.fullname,
+                    email: data.email
+                });
+
+            });
+        });
+
+
+        <?php endif; ?>
+    </script>
+<?php endif; ?>
+<script>
+    require(["customerData"], function (customerData) {
+
+        customerData().then(function (loggedIn, data) {
+            if (!loggedIn) {
+                return;
+            }
+
+            var ud = {email: data.email, id: data.id, name: data.fullname};
+            Sentry.setUser(ud);
+
+        });
     });
 </script>
