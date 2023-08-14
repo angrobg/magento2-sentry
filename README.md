@@ -23,7 +23,7 @@ This module uses the [Magento Deployment Configuration](https://devdocs.magento.
     'mage_mode_development' => false,
     'js_sdk_version' => \JustBetter\Sentry\Block\SentryScript::CURRENT_VERSION,
     'tracing_enabled' => true, 
-    'tracing_sample_rate' => 0.5,
+    'tracing_sample_rate' => 0.2,
 ]
 ```
 

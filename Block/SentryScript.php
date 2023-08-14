@@ -8,7 +8,7 @@ use Magento\Framework\View\Element\Template;
 
 class SentryScript extends Template
 {
-    const CURRENT_VERSION = '7.39.0';
+    const CURRENT_VERSION = '7.60.0';
 
     /**
      * @var DataHelper
@@ -23,16 +23,17 @@ class SentryScript extends Template
     /**
      * SentryScript constructor.
      *
-     * @param DataHelper       $dataHelper
+     * @param DataHelper $dataHelper
      * @param Template\Context $context
-     * @param array            $data
+     * @param array $data
      */
     public function __construct(
-        DataHelper $dataHelper,
-        Version $version,
+        DataHelper       $dataHelper,
+        Version          $version,
         Template\Context $context,
-        array $data = []
-    ) {
+        array            $data = []
+    )
+    {
         $this->dataHelper = $dataHelper;
         $this->version = $version;
 

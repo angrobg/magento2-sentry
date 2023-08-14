@@ -72,6 +72,7 @@ $remoteFileCaptureConsole ?>" crossorigin="anonymous"></script>
             new Sentry.Replay({
                 blockAllMedia: <?= $block->escapeHtml($block->getReplayBlockMedia() ? 'true' : 'false') ?>,
                 maskAllText: <?= $block->escapeHtml($block->getReplayMaskText() ? 'true' : 'false') ?>,
+                networkDetailAllowUrls: [window.location.origin],
             })
             <?php endif ?>
         ],

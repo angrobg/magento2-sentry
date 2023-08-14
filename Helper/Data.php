@@ -53,6 +53,8 @@ class Data extends AbstractHelper
      */
     protected $configKeys = [
         'dsn',
+        /* NIMA CHANGES - separate frontend/backend DSNs */
+        'dsn_backend',
         'logrocket_key',
         'log_level',
         'errorexception_reporting',
@@ -62,22 +64,24 @@ class Data extends AbstractHelper
         'js_sdk_version',
         'tracing_enabled',
         'tracing_sample_rate',
+        'profiles_sample_rate',
     ];
 
     /**
      * Data constructor.
      *
-     * @param Context               $context
+     * @param Context $context
      * @param StoreManagerInterface $storeManager
-     * @param State                 $appState
+     * @param State $appState
      */
     public function __construct(
-        Context $context,
-        StoreManagerInterface $storeManager,
-        State $appState,
+        Context                  $context,
+        StoreManagerInterface    $storeManager,
+        State                    $appState,
         ProductMetadataInterface $productMetadataInterface,
-        DeploymentConfig $deploymentConfig
-    ) {
+        DeploymentConfig         $deploymentConfig
+    )
+    {
         $this->storeManager = $storeManager;
         $this->appState = $appState;
         $this->scopeConfig = $context->getScopeConfig();
@@ -89,11 +93,25 @@ class Data extends AbstractHelper
     }
 
     /**
+     * // NIMA CHANGES - separate frontend/backend DSNs
      * @return mixed
      */
-    public function getDSN()
+    public function getDSNBackend()
+    {
+        return $this->config['dsn_backend'] ?? $this->config['dsn'];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDSNFrontend()
     {
         return $this->config['dsn'];
+    }
+
+    public function getDSN()
+    {
+        return $this->getDSNFrontend();
     }
 
     public function isTracingEnabled(): bool
@@ -103,7 +121,12 @@ class Data extends AbstractHelper
 
     public function getTracingSampleRate(): float
     {
-        return (float) $this->config['tracing_sample_rate'] ?? 0.2;
+        return (float)$this->config['tracing_sample_rate'] ?? 0.2;
+    }
+
+    public function getProfilesSampleRate(): float
+    {
+        return (float)$this->config['profiles_sample_rate'] ?? 0.2;
     }
 
     /**
@@ -145,7 +168,7 @@ class Data extends AbstractHelper
      */
     public function getGeneralConfig($code, $storeId = null)
     {
-        return $this->getConfigValue(self::XML_PATH_SRS.$code, $storeId);
+        return $this->getConfigValue(self::XML_PATH_SRS . $code, $storeId);
     }
 
     /**
@@ -156,7 +179,7 @@ class Data extends AbstractHelper
         $this->config['enabled'] = $this->deploymentConfig->get('sentry') !== null;
 
         foreach ($this->configKeys as $value) {
-            $this->config[$value] = $this->deploymentConfig->get('sentry/'.$value);
+            $this->config[$value] = $this->deploymentConfig->get('sentry/' . $value);
         }
 
         return $this->config;
@@ -246,7 +269,7 @@ class Data extends AbstractHelper
      */
     public function isPhpTrackingEnabled()
     {
-        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS.'enable_php_tracking');
+        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS . 'enable_php_tracking');
     }
 
     /**
@@ -254,32 +277,32 @@ class Data extends AbstractHelper
      */
     public function useScriptTag()
     {
-        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS.'enable_script_tag');
+        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS . 'enable_script_tag');
     }
 
     public function useSessionReplay(): bool
     {
-        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS.'enable_session_replay');
+        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS . 'enable_session_replay');
     }
 
     public function getReplaySessionSampleRate(): float
     {
-        return $this->getConfigValue(static::XML_PATH_SRS.'replay_session_sample_rate') ?? 0.1;
+        return $this->getConfigValue(static::XML_PATH_SRS . 'replay_session_sample_rate') ?? 0.1;
     }
 
     public function getReplayErrorSampleRate(): float
     {
-        return $this->getConfigValue(static::XML_PATH_SRS.'replay_error_sample_rate') ?? 1;
+        return $this->getConfigValue(static::XML_PATH_SRS . 'replay_error_sample_rate') ?? 1;
     }
 
     public function getReplayBlockMedia(): bool
     {
-        return $this->getConfigValue(static::XML_PATH_SRS.'replay_block_media') ?? true;
+        return $this->getConfigValue(static::XML_PATH_SRS . 'replay_block_media') ?? true;
     }
 
     public function getReplayMaskText(): bool
     {
-        return $this->getConfigValue(static::XML_PATH_SRS.'replay_mask_text') ?? true;
+        return $this->getConfigValue(static::XML_PATH_SRS . 'replay_mask_text') ?? true;
     }
 
     /**
@@ -294,7 +317,7 @@ class Data extends AbstractHelper
             return false;
         }
 
-        $name = 'sentry.'.$config;
+        $name = 'sentry.' . $config;
 
         return $name == $blockName;
     }
@@ -312,7 +335,7 @@ class Data extends AbstractHelper
      */
     public function useLogrocket()
     {
-        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS.'use_logrocket') &&
+        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS . 'use_logrocket') &&
             array_key_exists('logrocket_key', $this->config) &&
             $this->config['logrocket_key'] != null;
     }
@@ -322,7 +345,7 @@ class Data extends AbstractHelper
      */
     public function useLogrocketIdentify()
     {
-        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS.'logrocket_identify');
+        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS . 'logrocket_identify');
     }
 
     /**
@@ -330,7 +353,7 @@ class Data extends AbstractHelper
      */
     public function stripStaticContentVersion()
     {
-        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS_ISSUE_GROUPING.'strip_static_content_version');
+        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS_ISSUE_GROUPING . 'strip_static_content_version');
     }
 
     /**
@@ -338,7 +361,7 @@ class Data extends AbstractHelper
      */
     public function stripStoreCode()
     {
-        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS_ISSUE_GROUPING.'strip_store_code');
+        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS_ISSUE_GROUPING . 'strip_store_code');
     }
 
     /**
@@ -354,7 +377,7 @@ class Data extends AbstractHelper
      */
     public function getIgnoreExceptions()
     {
-        return (array) ($this->config['ignore_exceptions'] ?? []);
+        return (array)($this->config['ignore_exceptions'] ?? []);
     }
 
     /**
