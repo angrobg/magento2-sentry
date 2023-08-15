@@ -4,7 +4,9 @@ namespace JustBetter\Sentry\Block;
 
 use JustBetter\Sentry\Helper\Data as DataHelper;
 use JustBetter\Sentry\Helper\Version;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\View\Element\Template;
+use Magento\Framework\View\Element\Template\Context;
 
 class SentryScript extends Template
 {
@@ -16,6 +18,11 @@ class SentryScript extends Template
     private $dataHelper;
 
     /**
+     * @var RemoteAddress
+     */
+    private RemoteAddress $remoteAddress;
+
+    /**
      * @var Version
      */
     private $version;
@@ -24,18 +31,22 @@ class SentryScript extends Template
      * SentryScript constructor.
      *
      * @param DataHelper $dataHelper
-     * @param Template\Context $context
+     * @param Version $version
+     * @param Context $context
+     * @param RemoteAddress $remoteAddress
      * @param array $data
      */
     public function __construct(
         DataHelper       $dataHelper,
         Version          $version,
         Template\Context $context,
+        RemoteAddress    $remoteAddress,
         array            $data = []
     )
     {
         $this->dataHelper = $dataHelper;
         $this->version = $version;
+        $this->remoteAddress = $remoteAddress;
 
         parent::__construct($context, $data);
     }
@@ -187,6 +198,31 @@ class SentryScript extends Template
     public function isTracingEnabled(): bool
     {
         return $this->dataHelper->isTracingEnabled();
+    }
+
+    /**
+     * NIMA CHANGES
+     * @return ?array
+     */
+    public function getSessionReplayOnlyUrls(): ?array
+    {
+        return $this->dataHelper->getSessionReplayOnlyUrls();
+    }
+
+    /**
+     * NIMA CHANGES
+     * @return bool
+     */
+    public function isDebuggingEnabled(): bool
+    {
+        if (!$this->dataHelper->isDebuggingEnabled()) {
+            return false;
+        }
+
+        $limitDebugIps = $this->dataHelper->getLimitDebugIps();
+        $remoteIp = $this->remoteAddress->getRemoteAddress();
+
+        return !$limitDebugIps || in_array($remoteIp, $limitDebugIps);
     }
 
     public function getTracingSampleRate(): float

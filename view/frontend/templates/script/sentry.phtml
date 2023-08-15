@@ -16,7 +16,9 @@ if ($block->useSessionReplay()) {
     $bundleFile .= '.replay';
 }
 
-$bundleFile .= '.min.js';
+$debugEnabled = $block->isDebuggingEnabled();
+
+$bundleFile .= $debugEnabled ? '.js' : '.min.js';
 
 $remoteFile = sprintf(
     'https://browser.sentry-cdn.com/%s/%s',
@@ -34,15 +36,13 @@ $replaySessionRate = $block->getReplaySessionSampleRate();
 $replayErrorRate = $block->getReplayErrorSampleRate();
 
 // NIMA CHANGES - allow to fully log certain important uris
-$logAllUris = [
-    '/checkout',
-];
+$replayOnlyUrls = $block->getSessionReplayOnlyUrls();
 
 $requestUri = $_SERVER['REQUEST_URI'] ?? null;
 $logAllReplays = false;
 
 if ($requestUri) {
-    foreach ($logAllUris as $uri) {
+    foreach ($replayOnlyUrls as $uri) {
         if (substr($requestUri, 0, strlen($uri)) == $uri) {
             $logAllReplays = true;
             $replaySessionRate = $replayErrorRate = '1';
@@ -61,6 +61,10 @@ $remoteFileCaptureConsole ?>" crossorigin="anonymous"></script>
 <script>
     Sentry.init({
         dsn: '<?= $block->escapeUrl(trim($block->getDSN())) ?>',
+        <?php if ($debugEnabled): ?>
+        debug: true,
+        send_default_pii: true,
+        <?php endif ?>
         release: '<?= $block->escapeHtml(trim($block->getVersion())) ?>',
         environment: '<?= $block->escapeHtml(trim($block->getEnvironment())) ?>',
         integrations: [

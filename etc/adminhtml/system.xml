@@ -15,6 +15,13 @@
                     <label>Deployment config info</label>
                     <frontend_model>JustBetter\Sentry\Block\Adminhtml\System\Config\DeploymentConfigInfo</frontend_model>
                 </field>
+                <field id="enable_debug" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable Debugging</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="limit_debug_ips" translate="label" type="textarea" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Limit Debug IPs</label>
+                </field>
                 <field id="enable_php_tracking" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enable PHP Tracking</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -33,6 +40,12 @@
                 <field id="enable_session_replay" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enable Session Replay</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="enable_session_replay_only_urls" translate="label" type="textarea" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable Session Replay ONLY for URLs (1 URL per line)</label>
+                    <depends>
+                        <field id="enable_session_replay">1</field>
+                    </depends>
                 </field>
                 <field id="replay_session_sample_rate" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Session Sample Rate</label>

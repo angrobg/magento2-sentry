@@ -4,6 +4,7 @@
         <sentry>
             <general>
                 <enable_php_tracking>1</enable_php_tracking>
+                <enable_debug>0</enable_debug>
                 <enable_script_tag>0</enable_script_tag>
                 <script_tag_placement>before.body.end</script_tag_placement>
                 <use_logrocket>0</use_logrocket>

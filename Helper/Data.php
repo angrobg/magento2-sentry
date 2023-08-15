@@ -273,6 +273,37 @@ class Data extends AbstractHelper
     }
 
     /**
+     * NIMA CHANGES
+     * @return bool
+     */
+    public function isDebuggingEnabled(): bool
+    {
+        return $this->scopeConfig->isSetFlag(static::XML_PATH_SRS . 'enable_debug');
+    }
+
+    /**
+     * NIMA CHANGES
+     * @return ?array
+     */
+    public function getSessionReplayOnlyUrls(): ?array
+    {
+        return array_filter(
+            explode("\n", trim($this->getConfigValue(static::XML_PATH_SRS . 'enable_session_replay_only_urls')))
+        ) ?: null;
+    }
+
+    /**
+     * NIMA CHANGES
+     * @return ?array
+     */
+    public function getLimitDebugIps(): ?array
+    {
+        return array_filter(
+            explode("\n", trim($this->getConfigValue(static::XML_PATH_SRS . 'limit_debug_ips')))
+        ) ?: null;
+    }
+
+    /**
      * @return bool
      */
     public function useScriptTag()
