@@ -41,7 +41,7 @@ $replayOnlyUrls = $block->getSessionReplayOnlyUrls();
 $requestUri = $_SERVER['REQUEST_URI'] ?? null;
 $logAllReplays = false;
 
-if ($requestUri) {
+if ($requestUri && $replayOnlyUrls) {
     foreach ($replayOnlyUrls as $uri) {
         if (substr($requestUri, 0, strlen($uri)) == $uri) {
             $logAllReplays = true;
