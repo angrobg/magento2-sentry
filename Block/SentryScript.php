@@ -68,9 +68,10 @@ class SentryScript extends Template
             return true;
         }
 
-        if ($this->dataHelper->useSessionReplay()) {
-            return true;
-        }
+        // NIMA CHANGES: this causes a double Sentry.init() invokation!
+//        if ($this->dataHelper->useSessionReplay()) {
+//            return true;
+//        }
 
         return false;
     }
