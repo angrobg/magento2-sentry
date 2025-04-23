@@ -26,7 +26,6 @@ $remoteFile = sprintf(
     $bundleFile
 );
 
-// NIMA CHANGES
 $remoteFileCaptureConsole = sprintf(
     'https://browser.sentry-cdn.com/%s/captureconsole.min.js',
     $block->escapeHtmlAttr($block->getJsSdkVersion())
@@ -35,7 +34,6 @@ $remoteFileCaptureConsole = sprintf(
 $replaySessionRate = $block->getReplaySessionSampleRate();
 $replayErrorRate = $block->getReplayErrorSampleRate();
 
-// NIMA CHANGES - allow to fully log certain important uris
 $replayOnlyUrls = $block->getSessionReplayOnlyUrls();
 
 $requestUri = $_SERVER['REQUEST_URI'] ?? null;

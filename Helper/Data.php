@@ -53,7 +53,6 @@ class Data extends AbstractHelper
      */
     protected $configKeys = [
         'dsn',
-        /* NIMA CHANGES - separate frontend/backend DSNs */
         'dsn_backend',
         'logrocket_key',
         'log_level',
@@ -93,7 +92,6 @@ class Data extends AbstractHelper
     }
 
     /**
-     * // NIMA CHANGES - separate frontend/backend DSNs
      * @return mixed
      */
     public function getDSNBackend()
@@ -273,7 +271,6 @@ class Data extends AbstractHelper
     }
 
     /**
-     * NIMA CHANGES
      * @return bool
      */
     public function isDebuggingEnabled(): bool
@@ -282,7 +279,6 @@ class Data extends AbstractHelper
     }
 
     /**
-     * NIMA CHANGES
      * @return ?array
      */
     public function getSessionReplayOnlyUrls(): ?array
@@ -293,7 +289,6 @@ class Data extends AbstractHelper
     }
 
     /**
-     * NIMA CHANGES
      * @return ?array
      */
     public function getLimitDebugIps(): ?array

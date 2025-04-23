@@ -68,11 +68,6 @@ class SentryScript extends Template
             return true;
         }
 
-        // NIMA CHANGES: this causes a double Sentry.init() invokation!
-//        if ($this->dataHelper->useSessionReplay()) {
-//            return true;
-//        }
-
         return false;
     }
 
@@ -202,7 +197,6 @@ class SentryScript extends Template
     }
 
     /**
-     * NIMA CHANGES
      * @return ?array
      */
     public function getSessionReplayOnlyUrls(): ?array
@@ -211,7 +205,6 @@ class SentryScript extends Template
     }
 
     /**
-     * NIMA CHANGES
      * @return bool
      */
     public function isDebuggingEnabled(): bool

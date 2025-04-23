@@ -24,7 +24,6 @@ $remoteFile = sprintf(
     $bundleFile
 );
 
-// NIMA CHANGES
 $remoteFileCaptureConsole = sprintf(
     'https://browser.sentry-cdn.com/%s/captureconsole.min.js',
     $block->escapeHtmlAttr($block->getJsSdkVersion())
@@ -33,7 +32,6 @@ $remoteFileCaptureConsole = sprintf(
 $replaySessionRate = $block->getReplaySessionSampleRate();
 $replayErrorRate = $block->getReplayErrorSampleRate();
 
-// NIMA CHANGES - allow to fully log certain important uris
 $logAllUris = [
     '/checkout',
 ];
@@ -136,7 +134,6 @@ $remoteFileCaptureConsole ?>" crossorigin="anonymous"></script>
                     customerData.reload(['customer'], false)
                         .done(function () {
                             customerInfo = getCustomerInfo()
-                            // NIMA CHANGES: just in case!
                             setTimeout(function() {
                                 deferred.resolve(isLoggedIn(customerInfo), customerInfo);
                             }, 300);
